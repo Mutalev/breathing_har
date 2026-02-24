@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Дыхание 4–6</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(165deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #e8e8e8;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      opacity: 0.95;
+    }
+    .sub {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-bottom: 2rem;
+    }
+    .circle-wrap {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #4a7c9e, #2d5a7b);
+      box-shadow: 0 0 40px rgba(74, 124, 158, 0.4);
+      transition: transform 0.5s ease-in-out;
+    }
+    .circle.inhale { transform: scale(2.2); }
+    .circle.exhale { transform: scale(1); }
+    .phase {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .count {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #7eb8da;
+      min-height: 2.5rem;
+    }
+    .btn {
+      margin-top: 2rem;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.15);
+      color: #e8e8e8;
+      cursor: pointer;
+    }
+    .btn:active { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <h1>Дыхание 4–6</h1>
+  <p class="sub">Вдох на 4 счёта, выдох на 6</p>
+  <div class="circle-wrap">
+    <div class="circle" id="circle"></div>
+  </div>
+  <div class="phase" id="phase">Вдох</div>
+  <div class="count" id="count">4</div>
+  <button class="btn" id="stopBtn">Стоп</button>
+
+  <script>
+    const circle = document.getElementById('circle');
+    const phaseEl = document.getElementById('phase');
+    const countEl = document.getElementById('count');
+    const stopBtn = document.getElementById('stopBtn');
+
+    const INHALE_SEC = 4;
+    const EXHALE_SEC = 6;
+    let timer = null;
+    let running = false;
+
+    function runCycle() {
+      if (!running) return;
+      phaseEl.textContent = 'Вдох';
+      circle.classList.remove('exhale');
+      circle.classList.add('inhale');
+      let sec = INHALE_SEC;
+      countEl.textContent = sec;
+      const iv = setInterval(() => {
+        if (!running) { clearInterval(iv); return; }
+        sec--;
+        countEl.textContent = sec > 0 ? sec : '';
+        if (sec <= 0) {
+          clearInterval(iv);
+          phaseEl.textContent = 'Выдох';
+          circle.classList.remove('inhale');
+          circle.classList.add('exhale');
+          let ex = EXHALE_SEC;
+          countEl.textContent = ex;
+          const ev = setInterval(() => {
+            if (!running) { clearInterval(ev); return; }
+            ex--;
+            countEl.textContent = ex > 0 ? ex : '';
+            if (ex <= 0) {
+              clearInterval(ev);
+              runCycle();
+            }
+          }, 1000);
+        }
+      }, 1000);
+    }
+
+    function start() {
+      running = true;
+      runCycle();
+    }
+
+    stopBtn.addEventListener('click', () => {
+      running = false;
+      if (timer) clearTimeout(timer);
+      circle.classList.remove('inhale', 'exhale');
+      phaseEl.textContent = 'Пауза';
+      countEl.textContent = '';
+      if (typeof Telegram !== 'undefined' && Telegram.WebApp && Telegram.WebApp.close) {
+        Telegram.WebApp.close();
+      }
+    });
+
+    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+    }
+    start();
+  </script>
+</body>
+</html>

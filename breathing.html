@@ -63,7 +63,7 @@
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, rgba(126, 184, 218, 0.35), rgba(45, 90, 123, 0.2));
       border: 2px solid rgba(126, 184, 218, 0.25);
-      transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.5s;
+      transition: transform linear, opacity linear;
     }
     .circle-mid {
       position: absolute;
@@ -71,7 +71,7 @@
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #5a9bb8, #2d5a7b);
       box-shadow: 0 0 50px rgba(74, 124, 158, 0.4), inset 0 -4px 20px rgba(0,0,0,0.2);
-      transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+      transition: transform linear;
     }
     .circle-inner {
       position: absolute;
@@ -79,7 +79,7 @@
       border-radius: 50%;
       background: radial-gradient(circle at 40% 40%, #7eb8da, #4a7c9e);
       box-shadow: 0 0 30px rgba(126, 184, 218, 0.6);
-      transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+      transition: transform linear;
     }
     .circle-wrap.phase-inhale .circle-outer,
     .circle-wrap.phase-hold .circle-outer { transform: scale(2.4); opacity: 0.9; }
@@ -89,7 +89,7 @@
     .circle-wrap.phase-hold .circle-inner { transform: scale(2); }
     .circle-wrap.phase-hold .circle-outer,
     .circle-wrap.phase-hold .circle-mid,
-    .circle-wrap.phase-hold .circle-inner { transition-duration: 0.15s; }
+    .circle-wrap.phase-hold .circle-inner { transition-duration: 0.2s; }
     .circle-wrap.phase-exhale .circle-outer { transform: scale(1); opacity: 0.6; }
     .circle-wrap.phase-exhale .circle-mid { transform: scale(1); }
     .circle-wrap.phase-exhale .circle-inner { transform: scale(1); }
@@ -242,6 +242,12 @@
       const mode = MODES[currentMode];
       const phase = mode.phases[phaseIndex];
       phaseEl.textContent = phase.name;
+      // Длительность анимации = длительность фазы (круг растёт/уменьшается постепенно всю фазу)
+      const durationSec = phase.phaseClass === 'phase-hold' ? 0.2 : phase.sec;
+      circleWrap.querySelectorAll('.circle-outer, .circle-mid, .circle-inner').forEach(function(el) {
+        el.style.transitionDuration = durationSec + 's';
+        el.style.transitionTimingFunction = phase.phaseClass === 'phase-hold' ? 'ease-out' : 'ease-in-out';
+      });
       circleWrap.className = 'circle-wrap ' + phase.phaseClass;
       let sec = phase.sec;
       countEl.textContent = sec;
